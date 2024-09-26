@@ -5,8 +5,9 @@ php artisan migrate
 php artisan fetch:todos 
 
 <h3>Otomatik Haftalık için</h3> 
-php artisan schedule:work
+<p>php artisan schedule:work</p>
 
-<p>npm install</p>
-<p>npm run dev</p>
+
+<p>npm install<br>
+npm run dev</p>
 
