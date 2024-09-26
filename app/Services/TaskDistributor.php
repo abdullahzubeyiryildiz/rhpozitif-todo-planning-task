@@ -12,7 +12,7 @@ class TaskDistributor
     }
 
     /**
-     * Distributes tasks among developers based on their workload and capacity.
+     * Görevleri iş yüküne, kapasiteye ve görev düzeyine göre geliştiriciler arasında dağıtır.
      *
      * @param array $tasks
      * @return array
@@ -30,8 +30,9 @@ class TaskDistributor
         return $developers;
     }
 
+
     /**
-     * Initializes developers with tasks and workload.
+     * Geliştiricileri kapasite ve iş yükleriyle başlatır.
      *
      * @param array $developers
      * @return array
@@ -42,12 +43,14 @@ class TaskDistributor
             $developer['tasks'] = [];
             $developer['hoursWorked'] = 0;
             $developer['capacity'] = 45;
+            $developer['level'] = $developer['level'] ?? 5;
         }
         return $developers;
     }
 
+
     /**
-     * Assigns a task to a developer if possible.
+     * Mevcut kapasiteye ve maksimum görev seviyesine göre uygun bir geliştiriciye görev atar.
      *
      * @param array $task
      * @param array &$developers
@@ -55,10 +58,12 @@ class TaskDistributor
      */
     protected function assignTaskToDeveloper(array $task, array &$developers): void
     {
-        foreach ($developers as &$developer) {
+        usort($developers, fn($a, $b) => $a['hoursWorked'] <=> $b['hoursWorked']);
 
-            if ($task['level'] <= $developer['capacity'] &&
-                ($developer['hoursWorked'] + $task['time']) <= $developer['capacity']) {
+        foreach ($developers as &$developer) {
+            $developerHourlyWork = $developer['capacity'] / $developer['level'];
+
+            if ($task['level'] <= $developer['level'] && $task['time'] <= $developerHourlyWork) {
                 $developer['tasks'][] = $task;
                 $developer['hoursWorked'] += $task['time'];
                 break;
@@ -66,15 +71,34 @@ class TaskDistributor
         }
     }
 
+
+
     /**
-     * Calculates the total number of weeks required based on the developers' hours worked.
+     * Geliştirici kapasitesi ve görev yüküne bağlı olarak gereken hafta sayısını hesaplar.
      *
      * @param array $developers
      * @return int
      */
-    public function calculateWeeks(array $developers): int
+    public function calculateWeeks(array $developers): array
     {
-        $totalHours = array_sum(array_column($developers, 'hoursWorked'));
-        return (int) ceil($totalHours / 45);
+        $totalWeeks = 0;
+        $assignedTasksCount = [];
+
+        foreach ($developers as $developer) {
+            $totalDeveloperHours = $developer['hoursWorked'];
+            $developerWeeks = (int) ceil($totalDeveloperHours / $developer['capacity']);
+
+            $assignedTasksCount[$developer['name']] = count($developer['tasks']);
+
+            if ($developerWeeks > $totalWeeks) {
+                $totalWeeks = $developerWeeks;
+            }
+        }
+
+        return [
+            'weeks' => $totalWeeks,
+            'assignedTasksCount' => $assignedTasksCount
+        ];
     }
+
 }

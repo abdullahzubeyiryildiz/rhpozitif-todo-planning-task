@@ -45,9 +45,9 @@
               <div class="col-12">
                 <h2>Developerlar</h2>
                 <div v-for="developer in developers" :key="developer.name" class="accordion">
-                  <button class="accordion-header" @click="toggleAccordion($event)">
-                    {{ developer.name }}
-                  </button>
+                    <button class="accordion-header" @click="toggleAccordion($event)" :aria-expanded="isExpanded(developer)">
+                        {{ developer.name }}
+                    </button>
                   <div class="accordion-content">
                     <ul>
                       <li v-for="task in developer.tasks" :key="task.title">
@@ -58,64 +58,66 @@
                 </div>
               </div>
 
-              <!-- Estimated Weeks -->
-              <div class="col-12">
-                <h3 v-if="estimatedWeeks > 0">Tahmini Haftalar: {{ estimatedWeeks }}</h3>
-                <h3 v-else>Tahmini Haftalar bilgisi mevcut değil.</h3>
-              </div>
+
             </div>
           </div>
         </div>
       </div>
     </div>
-  </template>
+</template>
 
-  <script>
-  import axios from 'axios';
+<script>
+import axios from 'axios';
 
-  export default {
+export default {
     data() {
-      return {
-        tasks: [],
-        developers: [],
-        estimatedWeeks: 0,
-        isLoading: false,
-        errorMessage: ''
-      };
+        return {
+            tasks: [],
+            developers: [],
+            estimatedWeeks: 0,
+            isLoading: false,
+            errorMessage: '',
+            expandedDeveloper: null,
+        };
     },
     methods: {
-      fetchTasks() {
-        this.isLoading = true;
-        this.errorMessage = '';
-        axios.get('/api/developers')
-          .then(response => {
-            this.tasks = response.data.tasks;
-            this.developers = response.data.developers;
-            this.estimatedWeeks = response.data.weeks;
-          })
-          .catch(error => {
-            console.error('Error fetching tasks:', error);
-            this.errorMessage = 'Failed to fetch tasks, please try again later.';
-          })
-          .finally(() => {
-            this.isLoading = false;
-          });
-      },
-      getTaskLevelClass(level) {
-        if (level === 1) return 'badge badge-success';
-        if (level === 5) return 'badge badge-danger';
-        return 'badge badge-warning';
-      },
-      toggleAccordion(event) {
-        const content = event.target.nextElementSibling;
-        content.style.display = content.style.display === 'block' ? 'none' : 'block';
-      }
+        fetchTasks() {
+            this.isLoading = true;
+            this.errorMessage = '';
+            axios.get('/api/developers')
+                .then(response => {
+                    this.tasks = response.data.tasks;
+                    this.developers = response.data.developers;
+                    this.estimatedWeeks = response.data.weeks;
+                })
+                .catch(error => {
+                    console.error('Error fetching tasks:', error);
+                    this.errorMessage = 'Tasklar Listelenirken Hata Oluştu!';
+                })
+                .finally(() => {
+                    this.isLoading = false;
+                });
+        },
+        getTaskLevelClass(level) {
+            if (level === 1) return 'badge badge-success';
+            if (level === 5) return 'badge badge-danger';
+            return 'badge badge-warning';
+        },
+        isExpanded(developer) {
+            return this.expandedDeveloper === developer.name;
+        },
+        toggleAccordion(event) {
+            const content = event.target.nextElementSibling;
+            this.expandedDeveloper = this.expandedDeveloper === event.target.textContent ? null : event.target.textContent;
+            content.style.display = content.style.display === 'block' ? 'none' : 'block';
+            event.target.setAttribute('aria-expanded', content.style.display === 'block');
+        }
     },
     created() {
-      this.fetchTasks();
+        this.fetchTasks();
     }
-  };
-  </script>
+};
+</script>
 
   <style scoped>
   .container {
