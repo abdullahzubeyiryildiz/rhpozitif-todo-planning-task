@@ -40,21 +40,21 @@ class TaskService
     {
         DB::transaction(function () use ($tasks) {
             foreach ($tasks as $taskData) {
-                if (!empty($taskData['title']) && !empty($taskData['time']) && !empty($taskData['level'])) {
-
-                    if (!Task::where('title', $taskData['title'])
-                             ->where('time', $taskData['time'])
-                             ->where('level', $taskData['level'])
-                             ->exists()) {
-                        Task::create([
+                if (is_array($taskData) && $this->isValidTaskData($taskData)) {
+                    Task::updateOrCreate(
+                        [
                             'title' => $taskData['title'],
                             'time' => $taskData['time'],
                             'level' => $taskData['level'],
-                        ]);
-                    }
+                        ]
+                    );
                 }
             }
         });
     }
 
+    private function isValidTaskData(array $taskData): bool
+    {
+        return !empty($taskData['title']) && !empty($taskData['time']) && !empty($taskData['level']);
+    }
 }
