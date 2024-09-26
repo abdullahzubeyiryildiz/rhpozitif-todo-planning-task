@@ -1,4 +1,4 @@
-Kurulum
+<h1>Kurulum</h1>
 php artisan migrate
  
 <h3>Taskları Çeker Veritabanına kaydeder</h3> 
