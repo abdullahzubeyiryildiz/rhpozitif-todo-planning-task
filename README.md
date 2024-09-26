@@ -7,5 +7,6 @@ php artisan fetch:todos
 <h3>Otomatik Haftalık için</h3> 
 php artisan schedule:work
 
-npm install
-npm run dev
+<p>npm install</p>
+<p>npm run dev</p>
+
